@@ -162,3 +162,4 @@ cython_debug/
 /data
 adlcv-ex3/gpt2_pretrained.pt
 adlcv-ex3/submit.sh
+adlcv-ex3/checkpoints/*
