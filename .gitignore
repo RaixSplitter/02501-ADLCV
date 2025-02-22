@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 /.data
 /data
+adlcv-ex3/gpt2_pretrained.pt
+adlcv-ex3/submit.sh
