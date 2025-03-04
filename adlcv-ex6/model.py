@@ -189,8 +189,10 @@ class Classifier(nn.Module):
     def __init__(self, img_size=16, c_in=3, labels=5, time_dim=256, device="cuda", channels=32):
         super().__init__()
         
-        self.unet = UNet(img_size, c_in, time_dim=time_dim, device=device, channels=channels, num_classes=labels)
-        self.classifier = nn.Linear(time_dim, labels)
+        c_out = 3
+        
+        self.unet = UNet(img_size, c_in, c_out, time_dim=time_dim, device=device, channels=channels, num_classes=labels)
+        self.classifier = nn.Linear(c_out, labels)
         
 
     def forward(self, x, t):

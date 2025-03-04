@@ -59,9 +59,10 @@ def train(device='cpu', T=500, img_size=16, input_channels=3, channels=32, time_
             
             optimizer.zero_grad()
             
-            t = torch.randint(0, T, (images.size(0),), device=device)
-            x_t, noise = diffusion.p_sample_loop(model, images, t)
-            predicted_labels = model(x_t)
+            t = diffusion.sample_timesteps(images.shape[0]).to(device)
+            x_t, _ = diffusion.q_sample(images, t)
+            
+            predicted_labels = model(x_t, t)
             
             loss = loss_fn(predicted_labels, labels)
             loss_fn.backward()
@@ -69,7 +70,7 @@ def train(device='cpu', T=500, img_size=16, input_channels=3, channels=32, time_
             
             running_loss += loss.item()
             
-            pbar.set_description(f"Training running loss: {running_loss:.4f}, last loss: {last_loss:.4f}")
+            pbar.set_postfix(f"Training running loss: {running_loss:.4f}, last loss: {last_loss:.4f}")
         
         last_loss = running_loss / len(train_loader) # loss per batch
         running_loss = 0.
