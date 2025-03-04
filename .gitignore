@@ -166,3 +166,4 @@ adlcv-ex3/checkpoints/*
 
 *.out
 *.err
+/checkpoints

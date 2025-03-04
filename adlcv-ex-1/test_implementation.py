@@ -21,17 +21,17 @@ def test_attention(batch_size=16, seq_len=512, embed_dim=128, device='cpu'):
 def test_transformer(batch_size=16, seq_len=512, num_classes=2, device='cpu'):
 
     # input sequence: batch_size x seq_len
-    inpput_seq = torch.randint(low=0, high=50_000, size=(batch_size, seq_len)).to(device)
+    input_seq = torch.randint(low=0, high=50_000, size=(batch_size, seq_len)).to(device)
 
     transformer_cls = TransformerClassifier(num_classes=num_classes, max_seq_len=512, embed_dim=128, 
                                             num_heads=8, num_layers=2, pos_enc='fixed', pool='max'
     )
     transformer_cls = transformer_cls.to(device)
-    output = transformer_cls(inpput_seq)
+    output = transformer_cls(input_seq)
     
     assert output.size() == (batch_size, num_classes)
 
-    print(f'input sequence shape: {inpput_seq.shape}')
+    print(f'input sequence shape: {input_seq.shape}')
     print(f'classifier output shape: {output.shape}')
 
 def test_positional_encoding(embed_dim=128, max_seq_len=512):
