@@ -47,34 +47,21 @@ def train(device='cpu', T=500, img_size=16, input_channels=3, channels=32, time_
 
     for epoch in pbar:
         model.train()
-        
-        running_loss = 0.0
-        last_loss = 0.0
-        
         for images, labels in train_loader:
             images = images.to(device)
             labels = labels.to(device)
 
             # Do not forget to noise your images !
+            t = diffusion.sample_timesteps(images.shape[0]).to(device) # line 3 from the Training algorithm
+            x_t, _ = diffusion.q_sample(images,t) # inject noise to the images (forward process), HINT: use q_sample
+            predicted_class = model(x_t, t) # predict class of x_t using the UNet
+            loss = loss_fn(predicted_class, labels) # loss between predicted class and actual
             
             optimizer.zero_grad()
-            
-            t = diffusion.sample_timesteps(images.shape[0]).to(device)
-            x_t, _ = diffusion.q_sample(images, t)
-            
-            predicted_labels = model(x_t, t)
-            
-            loss = loss_fn(predicted_labels, labels)
-            loss_fn.backward()
+            loss.backward()
             optimizer.step()
-            
-            running_loss += loss.item()
-            
-            pbar.set_postfix(f"Training running loss: {running_loss:.4f}, last loss: {last_loss:.4f}")
-        
-        last_loss = running_loss / len(train_loader) # loss per batch
-        running_loss = 0.
-            
+
+            pbar.set_postfix(CE=loss.item())
             
     
     # save your checkpoint in weights/classifier/model.pth

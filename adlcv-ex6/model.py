@@ -4,7 +4,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-
 def pos_encoding(t, channels, device):
     inv_freq = 1.0 / (
         10000
@@ -142,19 +141,10 @@ class UNet(nn.Module):
             # Implement it as a 2-layer MLP with a GELU activation in-between
             # self.label_emb = ...
             self.label_emb = nn.Sequential(
-                nn.Linear(
-                    num_classes,
-                    time_dim
-                ),
+                nn.Linear(num_classes, time_dim),
                 nn.GELU(),
-                nn.Linear(
-                    time_dim,
-                    time_dim
-                )
+                nn.Linear(time_dim, time_dim),
             )
-        else:
-            self.label_emb = None
-                    
 
     def forward(self, x, t, y=None):
 
@@ -163,7 +153,7 @@ class UNet(nn.Module):
 
         if y is not None:
             # Add label and time embeddings together
-            pass
+            t += self.label_emb(y)
             
         x1 = self.inc(x)
         x2 = self.down1(x1, t)
@@ -188,15 +178,21 @@ class UNet(nn.Module):
 class Classifier(nn.Module):
     def __init__(self, img_size=16, c_in=3, labels=5, time_dim=256, device="cuda", channels=32):
         super().__init__()
-        
-        c_out = 3
-        
-        self.unet = UNet(img_size, c_in, c_out, time_dim=time_dim, device=device, channels=channels, num_classes=labels)
-        self.classifier = nn.Linear(c_out, labels)
-        
+        self.unet = UNet(img_size=img_size, c_in=c_in, c_out=channels, time_dim=time_dim, device=device, channels=channels)
+        self.dc1  = DoubleConv(in_channels=channels*1, out_channels=channels*2)
+        self.dc2  = DoubleConv(in_channels=channels*2, out_channels=channels*3)
+        self.flat = nn.Flatten()
+        self.ll   = nn.Sequential(
+            nn.Linear(in_features=channels*3 * img_size**2, out_features=1024),
+            nn.Linear(in_features=1024, out_features=labels),
+        )
+        self.soft = nn.LogSoftmax(dim=-1)
 
     def forward(self, x, t):
         x = self.unet(x, t)
-        x = x.mean(dim=(2, 3)) # Global average pooling
-        x = self.classifier(x)
+        x = self.dc1(x)
+        x = self.dc2(x)
+        x = self.flat(x)
+        x = self.ll(x)
+        x = self.soft(x)
         return x
