@@ -167,3 +167,5 @@ adlcv-ex3/checkpoints/*
 *.out
 *.err
 /checkpoints
+/adlcv-ex6/results
+/adlcv-ex6/results/DDPM-cfg
