@@ -53,7 +53,10 @@ def frechet_distance(mu1, sigma1, mu2, sigma2):
     # HINT: https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.sqrtm.html
     # Implement FID score
 
-    fid = ...
+    fid = np.sum((mu1 - mu2) ** 2) + np.trace(sigma1 + sigma2 - 2 * linalg.sqrtm(sigma1 @ sigma2))
+    # Check for imaginary component in the result due to numerical errors
+    if np.iscomplexobj(fid):
+        fid = fid.real
 
     return fid
 

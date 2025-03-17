@@ -2,6 +2,8 @@ import os
 from einops import repeat
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import seaborn
+seaborn.set_theme(style='whitegrid')
 
 # torch
 import torch
@@ -84,6 +86,7 @@ if __name__ == '__main__':
 
     plt.figure()
     plt.plot(t.cpu().numpy(), per_t_acc.cpu().numpy(), linewidth=3)
+    plt.title('Per Timestep Accuracy', fontweight='bold')
     plt.xlabel('Timestep', fontweight='bold')
     plt.ylabel('Accuracy', fontweight='bold')
     plt.savefig('./assets/per_t_accuracy.png', bbox_inches='tight')

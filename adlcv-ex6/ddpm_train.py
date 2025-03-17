@@ -77,6 +77,7 @@ def train(T=500, cfg=True, img_size=16, input_channels=3, channels=32,
                 # one-hot encode labels for classifier-free guidance
                 labels = labels.to(device)
                 labels = F.one_hot(labels, num_classes=num_classes).float()
+                labels[torch.rand_like(labels) >= p_uncod] = 0
             else :
                 labels = None
 
@@ -84,7 +85,7 @@ def train(T=500, cfg=True, img_size=16, input_channels=3, channels=32,
             # Do not forget randomly discard labels
             p_uncod = 0.1
 
-            labels[torch.rand_like(labels) >= p_uncod] = 0
+            
 
             t = diffusion.sample_timesteps(images.shape[0]).to(device) # line 3 from the Training algorithm
             x_t, noise = diffusion.q_sample(images,t) # inject noise to the images (forward process), HINT: use q_sample
